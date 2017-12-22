@@ -17,9 +17,14 @@ NumImage=0
 while(cap.isOpened()):
     ret, frame = cap.read()
     NumImage+=1
-    #plt.imshow(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
+    # Le while ne sort jamais de la boucle, on le teste ici
+    if frame is None:
+        break
     # Permet de reprendre l'enregistrement là où on était
-    Name=f"06-11-22-{NumImage}.png"
+    Name=f"Images/06-11-22-{NumImage}.png"
     if not os.path.isfile(Name):
         cv2.imwrite(Name,frame, compresion_params)    
+          
 cap.release()
+
+

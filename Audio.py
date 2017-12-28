@@ -47,7 +47,7 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre):
         feats = feature.mfcc(S=librosa.power_to_db(S), n_mfcc=13)
         # Rajout de la ligne de présence
         Nb_Fenetres=feats.shape[1]
-        f=np.vstack([feats,np.asarray([CurrentSequence[5]]*Nb_Fenetres).reshape(1,Nb_Fenetres)])
+        f=np.vstack([feats,np.asarray([CurrentSequence[2]]*Nb_Fenetres).reshape(1,Nb_Fenetres)])
         # on transpose (feature en colonne) et rojoute les lignes correspondant aux nouvelles fenêtres
         Retour+=f.transpose().tolist()                
     return Retour

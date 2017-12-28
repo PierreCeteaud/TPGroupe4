@@ -50,7 +50,9 @@ Test=Sequences[0:limit]
 Train=Sequences[limit+1:]
 
 Audio_Features=Audio.Train_Audio(Train,0.5,1)
-Video_Features=Video.Train_Video(Train,0.5,1)
+Video_Features=Video.Train_Video(Train,0.5,1,Audio.hz)
+if len(Video_Features)!=len(Audio_Features):
+    print("Erreur sur la synchronisation des fenêtres audios/video")
 
 # Concaténation des features audio et cideo, les deux dernières colonnes 
 # correspondent à l'identification de la présentatrice (audio/video)
@@ -61,3 +63,4 @@ len(Video_Features)
 len(Audio_Features)
 import importlib
 importlib.reload(Audio)
+importlib.reload(Video)

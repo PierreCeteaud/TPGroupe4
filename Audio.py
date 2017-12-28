@@ -10,30 +10,31 @@ import librosa
 import librosa.display
 import librosa.output
 import librosa.feature as feature
-import matplotlib.pyplot as plt
 
 window = 'hamming'
 fmin = 20
 # Cette limite est à étudier, en effet on trouvera facilement que la voix humaine
 # varie entre 80 et 1500 hz
 fmax = 4000
-Signal,hz= librosa.load('06-11-22.wav')
+try:
+    print("On conserve le signal à",hz,"hz")
+except:
+    Signal,hz= librosa.load('06-11-22.wav')
 
 
-def Train_Audio(Sequences,EcartFenetres,TailleFenetre):
+def Train_Audio(Sequences,EcartFenetres,TailleFenetre,center=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes
     # Retourne une liste des features par fenetre
     # une ligne par fenêtre
     # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice
-    # Sur chaque séquence l'écart est ajusté légèrement à la baisse pour faire entrer un nombre entier de fenêtres
+    # le nombre de fenêtres suit la règle définie par librosa.sftf
     Retour=[]
+    win_l=hz*TailleFenetre
+    hop_l=int(win_l/2)
+    win_l=int(win_l)
     for CurrentSequence in Sequences :
         Sequence=Signal[int(CurrentSequence[0].total_seconds()*hz)
                         :int(CurrentSequence[1].total_seconds()*hz)]
-        win_l=hz*TailleFenetre
-        hop_l=int(win_l/2)
-        win_l=int(win_l)
-        center=True
         D = np.abs(librosa.stft(Sequence, 
                                 window=window, 
                                 n_fft=win_l, 
@@ -52,4 +53,30 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre):
         Retour+=f.transpose().tolist()                
     return Retour
 
+"""
+CurrentSequence=Sequences[-1]
+Signal=Audio.Signal
+hz=Audio.hz
+fmin=Audio.fmin
+fmax=Audio.fmax
+TailleFenetre=1
+EcartFenetres=0.5
+D.shape[1]
+Sequence.shape
+import matplotlib.pyplot as plt
 
+for CurrentSequence in Sequences :
+    Sequence=Signal[int(CurrentSequence[0].total_seconds()*hz)
+                    :int(CurrentSequence[1].total_seconds()*hz)]
+    win_l=hz*TailleFenetre
+    hop_l=int(win_l/2)
+    win_l=int(win_l)
+    center=True
+    D = np.abs(librosa.stft(Sequence, 
+                            window=window, 
+                            n_fft=win_l, 
+                            win_length=win_l, 
+                            hop_length=hop_l,
+                            center=center))**2
+    print(len(Sequence),win_l,hop_l,D.shape[1])
+"""

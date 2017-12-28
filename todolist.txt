@@ -1,0 +1,8 @@
+- Trouver comment les fenêtres sont réparties dans le temps par librosa 
+	-hypothèse actuelle : il les fait tenir dans la séquence de façon à les écarter au maximum sans dépasser de la séquence
+	- Cette hypothèse est certainement fausse :
+		Car il y a un paramètre qui permet de rajouter des 0 dans les fenêtres qui dépassent de la séquence
+		Car le nombre de fenêtre de correspond pas à cette contrainte
+- Mettre en place un classifieur
+- Améliorer les features Audio
+- Améliorer les features Video

@@ -10,27 +10,33 @@ import numpy as np
 import math
 fps=25
 
-def Train_Video(Sequences,EcartFenetres,TailleFenetre):
+def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes
     # Retourne une liste des features par fenetre
     # une ligne par fenêtre
-    # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice
-    # Sur chaque séquence l'écart est ajusté légèrement à la baisse pour faire entrer un nombre entier de fenêtres
+    # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice    
+    # le nombre de fenêtres suit la règle définie par librosa.sftf
     Retour=[]
     for CurrentSequence in Sequences :
         # Temps en s de la sequence
         LargeurSequence=CurrentSequence[6]
         if LargeurSequence>=TailleFenetre:
-            # Nombre de fenêtres dans cette séquence arrondi au dessus
-            NbSequences=math.ceil(1+(LargeurSequence-TailleFenetre)/EcartFenetres)
-            # Comme on a arrondi au dessus on vas prendre un EcartFenetres un peu plus petit
-            # que demandé et on l'appelle EspacementFenetre
-            if NbSequences==1:
+            # Nombre de fenêtres dans cette séquence 
+            if center:
+                # La formule a été trouvée empiriquement
+                NbFenetres=math.ceil((LargeurSequence+1/hz)/EcartFenetres)
+            else:
+                # Celle-ci aussi
+                NbFenetres=math.ceil((LargeurSequence-TailleFenetre+1/hz)/EcartFenetres)
+            # Comme le nombre de fenêtre ne tombe pas pile poil pour les espacer de EcartFenetres
+            # à l'intérieur de la séquence on recalcule EcartFenetre et on l'appelle EspacementFenetre
+            # On n'a pas la garantie que sftf garde les fenêtre à l'intérieur de la séquence
+            if NbFenetres==1:
                 # Cas très spécifique où la séquence fait exactement la taille d'une fenêtre
                 EspacementFenetres=0
             else:
-                EspacementFenetres=(LargeurSequence-TailleFenetre)/(NbSequences-1)
-            for iFenetre in range (NbSequences):
+                EspacementFenetres=(LargeurSequence-TailleFenetre)/(NbFenetres-1)
+            for iFenetre in range (NbFenetres):
                 ImageMilieu=int(fps*(CurrentSequence[0].total_seconds()+iFenetre*EspacementFenetres))
                 img=GetImage(ImageMilieu)
                 grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -7,8 +7,8 @@ Created on Wed Dec 27 09:06:55 2017
 
 from datetime import timedelta
 from datetime import datetime
-from Audio import Train_Audio
-from Video import Train_Video
+import Audio
+import Video 
 
 ## Lecture du fichier des séquences
 dateReference=datetime(1900,1,1)
@@ -35,8 +35,8 @@ with open("Présente.csv",'r') as FSequences:
             # On suppose que l'on connait le début de la présentation et la fin du débat
             if Candidat[0]>timedelta(0,84) and Candidat[0]<timedelta(0,2340.5):
                 ToutesSequences.append(Candidat)
-                # Filtre sur les séquences trop courtes 
-                if Candidat[6]>=1:
+                # Filtre sur les séquences trop courtes et sur la présence de plusieurs personnes
+                if Candidat[6]>=1 and Candidat[2]<2 and Candidat[3]<2:
                     Sequences.append(Candidat)
                 
 # On choisi de faire l'apprentissage sur les séquences longues et les tests sur les séquences courtes pour :
@@ -49,13 +49,15 @@ Sequences.sort(key=lambda colonnes: colonnes[6])
 Test=Sequences[0:limit]
 Train=Sequences[limit+1:]
 
-Audio_Features=Train_Audio(Train,0.5,1)
-Video_Features=Train_Video(Train,0.5,1)
-
-# test
-Audio_Features=[[1,2,0],[3,4,1],[4,5,0],[6,7,1]]
-Video_Features=[[8,0],[0,0],[2,1],[4,1]]
+Audio_Features=Audio.Train_Audio(Train,0.5,1)
+Video_Features=Video.Train_Video(Train,0.5,1)
 
 # Concaténation des features audio et cideo, les deux dernières colonnes 
 # correspondent à l'identification de la présentatrice (audio/video)
 Features=[A[:-1]+V[:-1]+[A[-1]]+[V[-1]] for A,V in zip(Audio_Features,Video_Features)]
+
+len(Train)
+len(Video_Features)
+len(Audio_Features)
+import importlib
+importlib.reload(Audio)

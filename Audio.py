@@ -33,7 +33,7 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre):
         win_l=hz*TailleFenetre
         hop_l=int(win_l/2)
         win_l=int(win_l)
-        center=False
+        center=True
         D = np.abs(librosa.stft(Sequence, 
                                 window=window, 
                                 n_fft=win_l, 
@@ -51,4 +51,5 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre):
         # on transpose (feature en colonne) et rojoute les lignes correspondant aux nouvelles fenêtres
         Retour+=f.transpose().tolist()                
     return Retour
+
 

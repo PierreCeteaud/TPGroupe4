@@ -45,11 +45,20 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre,center=True):
         # calcul du MEL
         S = feature.melspectrogram(S=D, y=Sequence, n_mels=24, fmin=fmin, fmax=fmax)
         # calcul des 13 coefficients
-        feats = feature.mfcc(S=librosa.power_to_db(S), n_mfcc=13)
-        # Rajout de la ligne de présence
-        Nb_Fenetres=feats.shape[1]
-        f=np.vstack([feats,np.asarray([CurrentSequence[2]]*Nb_Fenetres).reshape(1,Nb_Fenetres)])
-        # on transpose (feature en colonne) et rojoute les lignes correspondant aux nouvelles fenêtres
+        mfcc = feature.mfcc(S=librosa.power_to_db(S), n_mfcc=13)
+        # Calcul de la dérivée
+        mfcc_delta = librosa.feature.delta(mfcc)
+        # Calcul de la dérivée seconde
+        mfcc_delta2 = librosa.feature.delta(mfcc_delta)
+
+        # Concatenation des features et Rajout de la ligne de présence
+        Nb_Fenetres=mfcc.shape[1]
+        f=np.vstack((mfcc,
+                     mfcc_delta,
+                     mfcc_delta2,
+                     np.asarray([CurrentSequence[2]]*Nb_Fenetres).reshape(1,Nb_Fenetres)
+                     ))
+        # on transpose (feature en colonne) et rajoute les lignes correspondant aux nouvelles fenêtres
         Retour+=f.transpose().tolist()                
     return Retour
 

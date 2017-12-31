@@ -39,15 +39,11 @@ with open("Présente.csv",'r') as FSequences:
                 if Candidat[6]>=1 and Candidat[2]<2 and Candidat[3]<2:
                     Sequences.append(Candidat)
                 
-# On choisi de faire l'apprentissage sur les séquences longues et les tests sur les séquences courtes pour :
-#   Avoir beaucoup de fenêtres d'apprentissage (une fenêtre = une ligne pour le classifieur)
-#   Avoir beaucoup de jeux de test (la validité du modèle est bien sur l'identification d'une séquence)
 
-ratio=0.5 # On fait un 50/50 en nombre de séquences
-limit=int(len(Sequences)*ratio)
-Sequences.sort(key=lambda colonnes: colonnes[6])
-Test=Sequences[0:limit]
-Train=Sequences[limit+1:]
+from sklearn.model_selection import train_test_split
+
+ratio=0.7
+Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)  
 
 Audio_Features=Audio.Train_Audio(Train,0.5,1)
 Video_Features=Video.Train_Video(Train,0.5,1,Audio.hz)

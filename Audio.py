@@ -16,6 +16,7 @@ fmin = 20
 # Cette limite est à étudier, en effet on trouvera facilement que la voix humaine
 # varie entre 80 et 1500 hz
 fmax = 4000
+n_mfcc=24
 try:
     print("On conserve le signal à",hz,"hz")
 except:
@@ -45,7 +46,7 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre,center=True):
         # calcul du MEL
         S = feature.melspectrogram(S=D, y=Sequence, n_mels=24, fmin=fmin, fmax=fmax)
         # calcul des 13 coefficients
-        mfcc = feature.mfcc(S=librosa.power_to_db(S), n_mfcc=13)
+        mfcc = feature.mfcc(S=librosa.power_to_db(S), n_mfcc=n_mfcc)
         # Calcul de la dérivée
         mfcc_delta = librosa.feature.delta(mfcc)
         # Calcul de la dérivée seconde

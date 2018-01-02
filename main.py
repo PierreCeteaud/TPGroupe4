@@ -55,7 +55,7 @@ if len(Video_Features)!=len(Audio_Features):
 Features=[A[:-1]+V[:-1]+[A[-1]]+[V[-1]] for A,V in zip(Audio_Features,Video_Features)]
 
 len(Train)
-len(Video_Features)
+len(Video_Features[1])
 len(Audio_Features)
 import importlib
 importlib.reload(Audio)

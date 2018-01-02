@@ -39,10 +39,52 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=Fals
             for iFenetre in range (NbFenetres):
                 ImageMilieu=int(fps*(CurrentSequence[0].total_seconds()+iFenetre*EspacementFenetres))
                 img=GetImage(ImageMilieu,cadree)
+                # Les deux première features sont
+                # la moyenne et la variance sur le niveau de gris
                 grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 m = np.mean(grayImage)
                 v= np.var(grayImage)
-                Retour.append([m,v,CurrentSequence[3]])        
+                R=[m,v]
+                # On rajoute 6 features :
+                # La moyenne et la variance sur chaque couleur
+                for color in range(3):
+                    image=img[:,:,color]                    
+                    m = np.mean(image)
+                    v= np.var(image)
+                    R.append(m)
+                    R.append(v)
+                # on va faire à peut prêt la même chose 
+                # avec le dodage des couleurs hsv
+                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+                # pour la saturation et la luminosité c'est exactement pareil
+                for val in range(1,3):
+                    image=img[:,:,color]                    
+                    m = np.mean(image)
+                    v= np.var(image)
+                    R.append(m)
+                    R.append(v)
+                # par contre la teinte est un angle
+                # la moyenne de 2 et 358 est 0 et non 180
+                angles=hsv[:,:,0]/360*math.pi
+                x=np.cos(angles)
+                y=np.sin(angles)
+                xmoyen=x.mean()
+                ymoyen=y.mean()
+                #Le calcul de l'angle moyen doit être adapté en fonction du 
+                #quadrant  où  se  trouve  le  vecteur  moyen,
+                if xmoyen==0:
+                    if ymoyen>=0:
+                        m=math.pi/2
+                    else:
+                        m=-math.pi/2
+                elif xmoyen>0:
+                    m=math.atan(ymoyen/xmoyen)
+                else: 
+                    m=math.pi+math.atan(ymoyen/xmoyen)
+                R.append(m)
+                v=1-(np.var(x)+np.var(y))**0.5
+                R.append(v)
+                Retour.append(R)        
     return Retour
 
 
@@ -52,3 +94,12 @@ def GetImage(NumImage,cadree=False):
     else:
         Name=f"Images/06-11-22-{NumImage}.png"
     return cv2.imread(Name)
+"""
+CurrentSequence=Sequences[0]
+EcartFenetres=0.5
+TailleFenetre=1
+center=True
+hz=22050
+iFenetre=0
+cadree=True
+"""

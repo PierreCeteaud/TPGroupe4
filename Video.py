@@ -10,7 +10,7 @@ import numpy as np
 import math
 fps=25
 
-def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True):
+def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=False):
     # EcartFenetres et TailleFenetre sont donnés en secondes
     # Retourne une liste des features par fenetre
     # une ligne par fenêtre
@@ -38,13 +38,17 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True):
                 EspacementFenetres=(LargeurSequence-TailleFenetre)/(NbFenetres-1)
             for iFenetre in range (NbFenetres):
                 ImageMilieu=int(fps*(CurrentSequence[0].total_seconds()+iFenetre*EspacementFenetres))
-                img=GetImage(ImageMilieu)
+                img=GetImage(ImageMilieu,cadree)
                 grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 m = np.mean(grayImage)
                 v= np.var(grayImage)
                 Retour.append([m,v,CurrentSequence[3]])        
     return Retour
 
-def GetImage(NumImage):
-    Name=f"Images/06-11-22-{NumImage}.png"
+
+def GetImage(NumImage,cadree=False):
+    if cadree:
+        Name=f"Images/cadree-{NumImage}.png"        
+    else:
+        Name=f"Images/06-11-22-{NumImage}.png"
     return cv2.imread(Name)

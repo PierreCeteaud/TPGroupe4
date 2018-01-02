@@ -46,7 +46,7 @@ ratio=0.7
 Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)  
 
 Audio_Features=Audio.Train_Audio(Train,0.5,1)
-Video_Features=Video.Train_Video(Train,0.5,1,Audio.hz)
+Video_Features=Video.Train_Video(Train,0.5,1,Audio.hz,cadree=True)
 if len(Video_Features)!=len(Audio_Features):
     print("Erreur sur la synchronisation des fenêtres audios/video")
 

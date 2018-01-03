@@ -9,6 +9,8 @@ from datetime import timedelta
 from datetime import datetime
 import Audio
 import Video 
+import Classifier
+import numpy as np
 
 ## Lecture du fichier des séquences
 dateReference=datetime(1900,1,1)
@@ -45,19 +47,66 @@ from sklearn.model_selection import train_test_split
 ratio=0.7
 Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)  
 
-Audio_Features=Audio.Train_Audio(Train,0.5,1)
-Video_Features=Video.Train_Video(Train,0.5,1,Audio.hz,cadree=True)
+Audio_Features,Audio_Y=Audio.Train_Audio(Train,0.5,1)
+Video_Features,Video_Y=Video.Train_Video(Train,0.5,1,Audio.hz,cadree=True)
 if len(Video_Features)!=len(Audio_Features):
     print("Erreur sur la synchronisation des fenêtres audios/video")
 
-# Concaténation des features audio et cideo, les deux dernières colonnes 
-# correspondent à l'identification de la présentatrice (audio/video)
-Features=[A[:-1]+V[:-1]+[A[-1]]+[V[-1]] for A,V in zip(Audio_Features,Video_Features)]
+
+# Concaténation des features audio et Video
+
+Features=np.hstack((Audio_Features,Video_Features))
+
+
+Audio_Test_Features,Audio_TY=Audio.Train_Audio(Test,0.5,1)
+Video_Test_Features,Video_TY=Video.Train_Video(Test,0.5,1,Audio.hz,cadree=True)
+TestFeatures=np.hstack((Audio_Test_Features,Video_Test_Features))
+
+# Concaténation des classement audio et vidéo
+Both_Y=Audio_Y*2+Video_Y
+Both_TY=Audio_TY*2+Video_TY
+
+
+
+# Classification globale
+
+importlib.reload(Classifier)
+G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
+print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
+print("Taux d'erreur sur le test:",1-(G[1][0]+G[1][5]+G[1][10]+G[1][15])/sum(G[1]))
+
+# C'est moins bien :-) => on garde les entrées videos pour améliorer l
+Y11=(Audio_Y==1)&(Video_Y==1)
+Y10=(Audio_Y==1)&(Video_Y==0)
+Y01=(Audio_Y==0)&(Video_Y==1)
+Y00=(Audio_Y==0)&(Video_Y==0)
+TY11=(Audio_TY==1)&(Video_TY==1)
+TY10=(Audio_TY==1)&(Video_TY==0)
+TY01=(Audio_TY==0)&(Video_TY==1)
+TY00=(Audio_TY==0)&(Video_TY==0)
+
+
+for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Test_Features),("Video",Video_Features,Video_Test_Features)):
+    for Y in (("Audio",Audio_Y,Audio_TY),
+              ("Video",Video_Y,Video_TY),
+              ("Totalement absente",Y00,TY00),
+              ("Présente video",Y01,TY01),
+              ("Présente audio",Y10,TY01),
+              ("Présente Audio+Video",Y11,TY11)):           
+        print(Y[0],"grâce à",F[0])
+        Result=Classifier.LDA(F[1],Y[1],F[2],Y[2])
+        Classifier.Print(Result)
+        
+"""
+
 
 len(Train)
 len(Video_Features[1])
-len(Audio_Features)
+print(len(Audio_Features),len(Audio_Y))
+print(len(Video_Features),len(Video_Y))
 import importlib
 importlib.reload(Audio)
 importlib.reload(Video)
+importlib.reload(Classifier)
 len(Audio_Features[0])
+"""

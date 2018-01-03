@@ -20,6 +20,7 @@ def LDA(Train,Y_Train,Test,Y_Test,Values=(True,False)):
             for Y in Values:
                 R.append(((jeu[0]==Pred)&(jeu[1]==Y)).sum())
         Retour.append(R)
+    Retour.append([PredTrain,PredTest])
     return Retour
 
 # Ne fonctionne qu'avec un LDA à deux valeurs cibles

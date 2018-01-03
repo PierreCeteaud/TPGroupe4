@@ -72,6 +72,7 @@ Both_TY=Audio_TY*2+Video_TY
 
 importlib.reload(Classifier)
 G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
+print("Un classifieur")
 print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
 print("Taux d'erreur sur le test:",1-(G[1][0]+G[1][5]+G[1][10]+G[1][15])/sum(G[1]))
 
@@ -85,7 +86,7 @@ TY10=(Audio_TY==1)&(Video_TY==0)
 TY01=(Audio_TY==0)&(Video_TY==1)
 TY00=(Audio_TY==0)&(Video_TY==0)
 
-
+Liste_Resultats=[]
 for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Test_Features),("Video",Video_Features,Video_Test_Features)):
     for Y in (("Audio",Audio_Y,Audio_TY),
               ("Video",Video_Y,Video_TY),
@@ -95,8 +96,38 @@ for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Te
               ("Présente Audio+Video",Y11,TY11)):           
         print(Y[0],"grâce à",F[0])
         Result=Classifier.LDA(F[1],Y[1],F[2],Y[2])
-        Classifier.Print(Result)
+        Liste_Resultats.append(Result)
+        #Classifier.Print(Result)
         
+# Nombre d'erreurs avec deux classifeurs
+print("Deux classifieurs")        
+print("Taux d'erreur sur le train:",1-((Audio_Y==Liste_Resultats[0][2][0])
+                                    &(Video_Y==Liste_Resultats[1][2][0])).sum()/len(Audio_Y))
+
+print("Taux d'erreur sur le test:",1-((Audio_TY==Liste_Resultats[0][2][1])
+                                    &(Video_TY==Liste_Resultats[1][2][1])).sum()/len(Audio_TY))
+
+# Nombre d'erreurs avec quatre classifeurs
+print("Quatre classifieurs")
+TrainPredit00=Liste_Resultats[2][2][0]
+Test_Predit00=Liste_Resultats[2][2][1]
+TrainPredit0V=Liste_Resultats[3][2][0]
+Test_Predit0V=Liste_Resultats[3][2][1]
+TrainPreditA0=Liste_Resultats[4][2][0]
+Test_PreditA0=Liste_Resultats[4][2][1]
+TrainPreditAV=Liste_Resultats[5][2][0]
+Test_PreditAV=Liste_Resultats[5][2][1]
+
+TrainPredit=Liste_Resultats[2][2][0],axis=0)
+
+print("Taux d'erreur sur le train:",1-((Audio_Y==Liste_Resultats[0][2][0])
+                                    &(Video_Y==Liste_Resultats[1][2][0])).sum()/len(Audio_Y))
+
+print("Taux d'erreur sur le test:",1-((Audio_TY==Liste_Resultats[0][2][1])
+                                    &(Video_TY==Liste_Resultats[1][2][1])).sum()/len(Audio_TY))
+
+
+
 """
 
 

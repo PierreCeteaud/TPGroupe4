@@ -12,11 +12,12 @@ fps=25
 
 def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=False):
     # EcartFenetres et TailleFenetre sont donnés en secondes
-    # Retourne une liste des features par fenetre
+    # Retour_Xne une liste des features par fenetre
     # une ligne par fenêtre
     # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice    
     # le nombre de fenêtres suit la règle définie par librosa.sftf
-    Retour=[]
+    Retour_X=[]
+    Retour_Y=[]
     for CurrentSequence in Sequences :
         # Temps en s de la sequence
         LargeurSequence=CurrentSequence[6]
@@ -64,8 +65,10 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=Fals
                     R.append(m)
                     R.append(v)
                 # par contre la teinte est un angle
-                # la moyenne de 2 et 358 est 0 et non 180
-                angles=hsv[:,:,0]/360*math.pi
+                # d'une façon générale pour un angle la moyenne de 2 et 358 est 0 et non 180
+                # et de plus openCV code les angles entre 0 et 179
+                # On doit donc trouver moyenne de 178 et 2 =0
+                angles=hsv[:,:,0]/180*math.pi
                 x=np.cos(angles)
                 y=np.sin(angles)
                 xmoyen=x.mean()
@@ -84,8 +87,9 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=Fals
                 R.append(m)
                 v=1-(np.var(x)+np.var(y))**0.5
                 R.append(v)
-                Retour.append(R)        
-    return Retour
+                Retour_X.append(R)        
+                Retour_Y.append(CurrentSequence[3])
+    return np.asarray(Retour_X),np.asarray(Retour_Y)
 
 
 def GetImage(NumImage,cadree=False):

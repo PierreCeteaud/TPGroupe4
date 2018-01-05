@@ -8,4 +8,3 @@
 - Etudier corélation entre présence à l'écran de la médiatrice et sa prise de parole
 - Améliorer les features Audio
 - Améliorer les features Video
-- Vérifier et justifier identité ou différence entre niveaux de gris et luminosité

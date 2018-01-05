@@ -8,3 +8,4 @@
 - Etudier corélation entre présence à l'écran de la médiatrice et sa prise de parole
 - Améliorer les features Audio
 - Améliorer les features Video
+- Sortir des statistiques par séquence

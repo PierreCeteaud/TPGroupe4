@@ -47,11 +47,17 @@ from sklearn.model_selection import train_test_split
 ratio=0.7
 Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)  
 
-NumSeqAudioTrain,Audio_Features,Audio_Y=Audio.Train_Audio(Train,0.5,1)
-NumSeqVideoTrain,Video_Features,Video_Y=Video.Train_Video(Train,0.5,1,Audio.hz,cadree=True)
+importlib.reload(Audio)
+NumSeqAudioTrain,Audio_Features,Audio_Y=Audio.Train_Audio(Train,0.5,1,center=False)
+importlib.reload(Video)
+NumSeqVideoTrain,Video_Features,Video_Y=Video.Train_Video(Train,0.5,1,Audio.hz,cadree=True,center=False)
 if NumSeqAudioTrain!=NumSeqVideoTrain:
     print("Erreur sur la synchronisation des fenêtres audio/video du train")
+"""
+print(NumSeqAudioTrain.index(100),NumSeqAudioTrain.index(101),NumSeqVideoTrain.index(100),NumSeqVideoTrain.index(101))
+print(NumSeqAudioTrain.index(0),NumSeqAudioTrain.index(1),NumSeqVideoTrain.index(0),NumSeqVideoTrain.index(1))
 
+"""
 
 # Concaténation des features audio et Video
 
@@ -206,25 +212,4 @@ Test_Predit00[test]
 Test_Predit0V[test]
 Test_PreditA0[test]
 Test_PreditAV[test]
-1
-2
-7
-12
-24
-25
-36
-39
-44
-50
-56
-61
-64
-69
-72
-73
-77
-80
-92
-93
-100
 """

@@ -18,25 +18,23 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=Fals
     # le nombre de fenêtres suit la règle définie par librosa.sftf
     Retour_X=[]
     Retour_Y=[]
-    for CurrentSequence in Sequences :
+    Retour_NumSequence=[]
+    if center:
+        Aggrandissement=2*(TailleFenetre*hz//2) #n_fft/2 deux fois
+    else:
+        Aggrandissement=0
+    for i in range(len(Sequences)):
+        CurrentSequence=Sequences[i]
         # Temps en s de la sequence
         LargeurSequence=CurrentSequence[6]
         if LargeurSequence>=TailleFenetre:
             # Nombre de fenêtres dans cette séquence 
-            if center:
-                # La formule a été trouvée empiriquement
-                NbFenetres=math.ceil((LargeurSequence+1/hz)/EcartFenetres)
-            else:
-                # Celle-ci aussi
-                NbFenetres=math.ceil((LargeurSequence-TailleFenetre+1/hz)/EcartFenetres)
-            # Comme le nombre de fenêtre ne tombe pas pile poil pour les espacer de EcartFenetres
-            # à l'intérieur de la séquence on recalcule EcartFenetre et on l'appelle EspacementFenetre
-            # On n'a pas la garantie que sftf garde les fenêtre à l'intérieur de la séquence
-            if NbFenetres==1:
-                # Cas très spécifique où la séquence fait exactement la taille d'une fenêtre
-                EspacementFenetres=0
-            else:
-                EspacementFenetres=(LargeurSequence-TailleFenetre)/(NbFenetres-1)
+            len_y=LargeurSequence*hz+Aggrandissement
+            NbFenetres= 1 + int((len_y - TailleFenetre*hz) / (EcartFenetres*hz))
+            if i==100:
+                print(CurrentSequence,NbFenetres)
+            # Comme pour l'audio
+            EspacementFenetres=TailleFenetre*EcartFenetres
             for iFenetre in range (NbFenetres):
                 ImageMilieu=int(fps*(CurrentSequence[0].total_seconds()+iFenetre*EspacementFenetres))
                 img=GetImage(ImageMilieu,cadree)
@@ -89,7 +87,8 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=Fals
                 R.append(v)
                 Retour_X.append(R)        
                 Retour_Y.append(CurrentSequence[3])
-    return np.asarray(Retour_X),np.asarray(Retour_Y)
+                Retour_NumSequence.append(i)
+    return Retour_NumSequence,np.asarray(Retour_X),np.asarray(Retour_Y)
 
 
 def GetImage(NumImage,cadree=False):
@@ -99,10 +98,10 @@ def GetImage(NumImage,cadree=False):
         Name=f"Images/06-11-22-{NumImage}.png"
     return cv2.imread(Name)
 """
-CurrentSequence=Sequences[0]
-EcartFenetres=0.5
+CurrentSequence=Sequences[100]
+EcartFenetres=0.25
 TailleFenetre=1
-center=True
+center=False
 hz=22050
 iFenetre=0
 cadree=True

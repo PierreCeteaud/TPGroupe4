@@ -25,15 +25,18 @@ except:
 
 def Train_Audio(Sequences,EcartFenetres,TailleFenetre,center=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes
-    # Retourne une liste des features par fenetre
+    # Retour_Xne une liste des features par fenetre
     # une ligne par fenêtre
     # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice
     # le nombre de fenêtres suit la règle définie par librosa.sftf
-    Retour=[]
+    Retour_X=[]
+    Retour_Y=[]
+    Retour_NumSequence=[]
     win_l=hz*TailleFenetre
-    hop_l=int(win_l/2)
+    hop_l=int(win_l*EcartFenetres)
     win_l=int(win_l)
-    for CurrentSequence in Sequences :
+    for i in range(len(Sequences)):
+        CurrentSequence=Sequences[i]
         Sequence=Signal[int(CurrentSequence[0].total_seconds()*hz)
                         :int(CurrentSequence[1].total_seconds()*hz)]
         D = np.abs(librosa.stft(Sequence, 
@@ -42,7 +45,6 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre,center=True):
                                 win_length=win_l, 
                                 hop_length=hop_l,
                                 center=center))**2
-        
         # calcul du MEL
         S = feature.melspectrogram(S=D, y=Sequence, n_mels=24, fmin=fmin, fmax=fmax)
         # calcul des 13 coefficients
@@ -51,17 +53,18 @@ def Train_Audio(Sequences,EcartFenetres,TailleFenetre,center=True):
         mfcc_delta = librosa.feature.delta(mfcc)
         # Calcul de la dérivée seconde
         mfcc_delta2 = librosa.feature.delta(mfcc_delta)
-
         # Concatenation des features et Rajout de la ligne de présence
         Nb_Fenetres=mfcc.shape[1]
         f=np.vstack((mfcc,
                      mfcc_delta,
                      mfcc_delta2,
-                     np.asarray([CurrentSequence[2]]*Nb_Fenetres).reshape(1,Nb_Fenetres)
                      ))
+        Y=[CurrentSequence[2]]*Nb_Fenetres
         # on transpose (feature en colonne) et rajoute les lignes correspondant aux nouvelles fenêtres
-        Retour+=f.transpose().tolist()                
-    return Retour
+        Retour_X+=f.transpose().tolist()                
+        Retour_Y+=Y
+        Retour_NumSequence+=[i]*Nb_Fenetres
+    return Retour_NumSequence,np.array(Retour_X),np.array(Retour_Y)
 
 """
 CurrentSequence=Sequences[-1]
@@ -89,4 +92,9 @@ for CurrentSequence in Sequences :
                             hop_length=hop_l,
                             center=center))**2
     print(len(Sequence),win_l,hop_l,D.shape[1])
+f.shape
+mfcc.shape
+len(Retour_X)
+len(Retour_Y)
+Y.shape
 """

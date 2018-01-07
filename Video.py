@@ -31,8 +31,6 @@ def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=Fals
             # Nombre de fenêtres dans cette séquence 
             len_y=LargeurSequence*hz+Aggrandissement
             NbFenetres= 1 + int((len_y - TailleFenetre*hz) / (EcartFenetres*hz))
-            if i==100:
-                print(CurrentSequence,NbFenetres)
             # Comme pour l'audio
             EspacementFenetres=TailleFenetre*EcartFenetres
             for iFenetre in range (NbFenetres):

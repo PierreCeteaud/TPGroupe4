@@ -1,6 +1,18 @@
-- Trouver un classifieur qui soit indépendant des 4 invités
+Obligatoire
 - Pourquoi les résultats "présente audio et pas en vidéo" sont mauvais et que ça n'impacte pas le global
 - Etudier corélation entre présence à l'écran de la médiatrice et sa prise de parole
-- Améliorer les features Audio
-- Améliorer les features Video
-- Sortir des statistiques par séquence
+- Décrire comment notre programme pourrait être utilisé sur d'autres vidéos
+
+Optionnels mais bien
+
+- Trouver un classifieur qui soit indépendant des 4 invités
+
+- Ajouter des features Audio
+- Ajouter des features Video
+
+- Mettre en place un séquenceur audio
+
+- Faire varier le recouvrement
+- Faire varier la taille des fenêtres
+- Faire varier la taille des bandes MEL
+- Mettre en place un seuillage pour éliminer les fenêtres de blanc

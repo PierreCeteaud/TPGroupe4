@@ -10,83 +10,67 @@ import numpy as np
 import math
 fps=25
 
-def Train_Video(Sequences,EcartFenetres,TailleFenetre,hz,center=True,cadree=False):
+def Features_Video(Fenetres,TailleFenetre,cadree=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes
     # Retour_Xne une liste des features par fenetre
     # une ligne par fenêtre
     # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice    
     # le nombre de fenêtres suit la règle définie par librosa.sftf
     Retour_X=[]
-    Retour_Y=[]
-    Retour_NumSequence=[]
-    if center:
-        Aggrandissement=2*(TailleFenetre*hz//2) #n_fft/2 deux fois
-    else:
-        Aggrandissement=0
-    for i in range(len(Sequences)):
-        CurrentSequence=Sequences[i]
-        # Temps en s de la sequence
-        LargeurSequence=CurrentSequence[6]
-        if LargeurSequence>=TailleFenetre:
-            # Nombre de fenêtres dans cette séquence 
-            len_y=LargeurSequence*hz+Aggrandissement
-            NbFenetres= 1 + int((len_y - TailleFenetre*hz) / (EcartFenetres*hz))
-            # Comme pour l'audio
-            EspacementFenetres=TailleFenetre*EcartFenetres
-            for iFenetre in range (NbFenetres):
-                ImageMilieu=int(fps*(CurrentSequence[0].total_seconds()+iFenetre*EspacementFenetres))
-                img=GetImage(ImageMilieu,cadree)
-                # Les deux première features sont
-                # la moyenne et la variance sur le niveau de gris
-                grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                m = np.mean(grayImage)
-                v= np.var(grayImage)
-                R=[m,v]
-                # On rajoute 6 features :
-                # La moyenne et la variance sur chaque couleur
-                for color in range(3):
-                    image=img[:,:,color]                    
-                    m = np.mean(image)
-                    v= np.var(image)
-                    R.append(m)
-                    R.append(v)
-                # on va faire à peut prêt la même chose 
-                # avec le dodage des couleurs hsv
-                hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-                # pour la saturation et la luminosité c'est exactement pareil
-                for val in range(1,3):
-                    image=img[:,:,color]                    
-                    m = np.mean(image)
-                    v= np.var(image)
-                    R.append(m)
-                    R.append(v)
-                # par contre la teinte est un angle
-                # d'une façon générale pour un angle la moyenne de 2 et 358 est 0 et non 180
-                # et de plus openCV code les angles entre 0 et 179
-                # On doit donc trouver moyenne de 178 et 2 =0
-                angles=hsv[:,:,0]/180*math.pi
-                x=np.cos(angles)
-                y=np.sin(angles)
-                xmoyen=x.mean()
-                ymoyen=y.mean()
-                #Le calcul de l'angle moyen doit être adapté en fonction du 
-                #quadrant  où  se  trouve  le  vecteur  moyen,
-                if xmoyen==0:
-                    if ymoyen>=0:
-                        m=math.pi/2
-                    else:
-                        m=-math.pi/2
-                elif xmoyen>0:
-                    m=math.atan(ymoyen/xmoyen)
-                else: 
-                    m=math.pi+math.atan(ymoyen/xmoyen)
-                R.append(m)
-                v=1-(np.var(x)+np.var(y))**0.5
-                R.append(v)
-                Retour_X.append(R)        
-                Retour_Y.append(CurrentSequence[3])
-                Retour_NumSequence.append(i)
-    return Retour_NumSequence,np.asarray(Retour_X),np.asarray(Retour_Y)
+    for DebutFenetre in Fenetres:
+        ImageMilieu=int(fps*(DebutFenetre+TailleFenetre/2))
+        img=GetImage(ImageMilieu,cadree)
+        # Les deux première features sont
+        # la moyenne et la variance sur le niveau de gris
+        grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        m = np.mean(grayImage)
+        v= np.var(grayImage)
+        R=[m,v]
+        # On rajoute 6 features :
+        # La moyenne et la variance sur chaque couleur
+        for color in range(3):
+            image=img[:,:,color]    
+            m = np.mean(image)
+            v= np.var(image)
+            R.append(m)
+            R.append(v)
+        # on va faire à peut prêt la même chose 
+        # avec le dodage des couleurs hsv
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # pour la saturation et la luminosité c'est exactement pareil
+        for val in range(1,3):
+            image=img[:,:,color]                    
+            m = np.mean(image)
+            v= np.var(image)
+            R.append(m)
+            R.append(v)
+        # par contre la teinte est un angle
+        # d'une façon générale pour un angle la moyenne de 2 et 358 est 0 et non 180
+        # et de plus openCV code les angles entre 0 et 179
+        # On doit donc trouver moyenne de 178 et 2 =0
+        angles=hsv[:,:,0]/180*math.pi
+        x=np.cos(angles)
+        y=np.sin(angles)
+        xmoyen=x.mean()
+        ymoyen=y.mean()
+        #Le calcul de l'angle moyen doit être adapté en fonction du 
+        #quadrant  où  se  trouve  le  vecteur  moyen,
+        if xmoyen==0:
+            if ymoyen>=0:
+                m=math.pi/2
+            else:
+                m=-math.pi/2
+        elif xmoyen>0:
+            m=math.atan(ymoyen/xmoyen)
+        else: 
+            m=math.pi+math.atan(ymoyen/xmoyen)
+        R.append(m)
+        v=1-(np.var(x)+np.var(y))**0.5
+        R.append(v)
+        Retour_X.append(R)   
+        if len(Retour_X)!=Fenetres.index(DebutFenetre)+1:
+            print(len(Retour_X),Fenetres.index(DebutFenetre))
+    return np.asarray(Retour_X)
 
 
 def GetImage(NumImage,cadree=False):

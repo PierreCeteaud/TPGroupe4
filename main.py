@@ -10,7 +10,9 @@ from datetime import datetime
 import Audio
 import Video 
 import Classifier
+import Fenetrage
 import numpy as np
+import importlib
 
 ## Lecture du fichier des séquences
 dateReference=datetime(1900,1,1)
@@ -47,26 +49,25 @@ from sklearn.model_selection import train_test_split
 ratio=0.7
 Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)  
 
-importlib.reload(Audio)
-NumSeqAudioTrain,Audio_Features,Audio_Y=Audio.Train_Audio(Train,0.5,1,center=False)
-importlib.reload(Video)
-NumSeqVideoTrain,Video_Features,Video_Y=Video.Train_Video(Train,0.5,1,Audio.hz,cadree=True,center=False)
-if NumSeqAudioTrain!=NumSeqVideoTrain:
-    print("Erreur sur la synchronisation des fenêtres audio/video du train")
-"""
-print(NumSeqAudioTrain.index(100),NumSeqAudioTrain.index(101),NumSeqVideoTrain.index(100),NumSeqVideoTrain.index(101))
-print(NumSeqAudioTrain.index(0),NumSeqAudioTrain.index(1),NumSeqVideoTrain.index(0),NumSeqVideoTrain.index(1))
+importlib.reload(Fenetrage)
+NumSeqTrain,Audio_Y,Video_Y,FenetresTrain=Fenetrage.Decoupe(Train,0.5,1)
+NumSeqTest,Audio_TY,Video_TY,FenetresTest=Fenetrage.Decoupe(Test,0.5,1)
 
-"""
+importlib.reload(Audio)
+Audio_Features=Audio.Features_Audio(FenetresTrain,1,0.5,center=False)
+importlib.reload(Video)
+Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
 
 # Concaténation des features audio et Video
 
 Features=np.hstack((Audio_Features,Video_Features))
-
-NumSeqAudioTest,Audio_Test_Features,Audio_TY=Audio.Train_Audio(Test,0.5,1)
-NumSeqVideoTest,Video_Test_Features,Video_TY=Video.Train_Video(Test,0.5,1,Audio.hz,cadree=True)
-if NumSeqAudioTest!=NumSeqVideoTest:
-    print("Erreur sur la synchronisation des fenêtres audio/video du test")
+Audio_Y.shape
+len(NumSeqTrain)
+Audio_Features.shape
+Video_Features.shape
+len(FenetresTrain)
+Audio_Test_Features=Audio.Features_Audio(FenetresTest,1,0.5,center=False)
+Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
 
 TestFeatures=np.hstack((Audio_Test_Features,Video_Test_Features))
 
@@ -75,7 +76,6 @@ Both_Y=Audio_Y*2+Video_Y
 Both_TY=Audio_TY*2+Video_TY
 
 # Classification globale
-
 G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
 print("Un classifieur")
 print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
@@ -157,7 +157,7 @@ Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Au
 PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqAudioTrain,Classe,Pred_Train)
 print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
 
-importlib.reload(Classifier)
+#importlib.reload(Classifier)
 Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
 PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqAudioTest,Classe,Pred_Test)
 print("Taux d'erreur sur le test :",Ko/(Ok+Ko))

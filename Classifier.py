@@ -178,7 +178,22 @@ def PredictionFenetre4Classifieurs(NumSequence,Reel,Predictions):
         Ko+=1
     return PredictionsFenetres,Ok,Ko
 
+from statsmodels import robust
+
+Mediane_=0
+Mad_=0
+
+def NormaliseTrain(Features):
+    global Mediane_
+    global Mad_
+    Mediane_=np.median(Features,axis=0)
+    Mad_=robust.mad(Features,axis=0)
+    return NormaliseAutres(Features)
+def NormaliseAutres(Features):
+    return (Features-Mediane_)/Mad_
 """    
+
+Normalisation(Features)
 NumSequence=NumSeqAudioTrain
 Reel=Classe
 

@@ -58,20 +58,23 @@ Audio_Features=Audio.Features_Audio(FenetresTrain,1,0.5,center=False)
 importlib.reload(Video)
 Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
 
-# Concaténation des features audio et Video
 
-Features=np.hstack((Audio_Features,Video_Features))
-Audio_Y.shape
-len(NumSeqTrain)
-Audio_Features.shape
-Video_Features.shape
-len(FenetresTrain)
 Audio_Test_Features=Audio.Features_Audio(FenetresTest,1,0.5,center=False)
 Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
 
+# Concaténation et normalisation des features audio et Video
+
+Features=np.hstack((Audio_Features,Video_Features))
 TestFeatures=np.hstack((Audio_Test_Features,Video_Test_Features))
 
-# Concaténation des classement audio et vidéo
+importlib.reload(Classifier)
+
+Normalisation=True
+if Normalisation:
+    Features=Classifier.NormaliseTrain(Features)
+    TestFeatures=Classifier.NormaliseAutres(TestFeatures)
+
+# Concaténation des classes audio et vidéo
 Both_Y=Audio_Y*2+Video_Y
 Both_TY=Audio_TY*2+Video_TY
 
@@ -142,11 +145,11 @@ Pred_Train=G[2][0]
 Pred_Test=G[2][1]
 
 Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqAudioTrain,Classe,Pred_Train)
+PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTrain,Classe,Pred_Train)
 print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
 
 Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqAudioTest,Classe,Pred_Test)
+PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTest,Classe,Pred_Test)
 print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
 
 print("Deux classifieurs")
@@ -154,12 +157,12 @@ Pred_Train=Liste_Resultats[0][2][0]*2+Liste_Resultats[1][2][0]
 Pred_Test=Liste_Resultats[0][2][1]*2+Liste_Resultats[1][2][1]
 
 Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqAudioTrain,Classe,Pred_Train)
+PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTrain,Classe,Pred_Train)
 print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
 
 #importlib.reload(Classifier)
 Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqAudioTest,Classe,Pred_Test)
+PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTest,Classe,Pred_Test)
 print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
 
 print("Quatre classifieurs")
@@ -167,13 +170,13 @@ print("Quatre classifieurs")
 Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
 Predictions=list(zip(TrainPredit00,TrainPredit0V,TrainPreditA0,TrainPreditAV))
 
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqAudioTrain,Classe,Predictions)
+PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqTrain,Classe,Predictions)
 
 print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
 Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
 Predictions=list(zip(Test_Predit00,Test_Predit0V,Test_PreditA0,Test_PreditAV))
 
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqAudioTest,Classe,Predictions)
+PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqTest,Classe,Predictions)
 
 print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
 

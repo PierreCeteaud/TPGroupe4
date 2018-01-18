@@ -58,7 +58,6 @@ Audio_Features=Audio.Features_Audio(FenetresTrain,1,0.5,center=False)
 importlib.reload(Video)
 Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
 
-
 Audio_Test_Features=Audio.Features_Audio(FenetresTest,1,0.5,center=False)
 Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
 

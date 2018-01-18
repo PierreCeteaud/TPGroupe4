@@ -10,6 +10,10 @@ import numpy as np
 import math
 fps=25
 
+Images=[None]*58773
+ 
+
+
 def Features_Video(Fenetres,TailleFenetre,cadree=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes
     # Retour_Xne une liste des features par fenetre
@@ -67,19 +71,70 @@ def Features_Video(Fenetres,TailleFenetre,cadree=True):
         R.append(m)
         v=1-(np.var(x)+np.var(y))**0.5
         R.append(v)
+        D=Dynamisme(DebutFenetre,TailleFenetre)
+        R.append(D)
         Retour_X.append(R)   
         if len(Retour_X)!=Fenetres.index(DebutFenetre)+1:
             print(len(Retour_X),Fenetres.index(DebutFenetre))
     return np.asarray(Retour_X)
 
-
+def Dynamisme(DebutFenetre,TailleFenetre):
+    ImagePrec=None
+    Mouvements=None
+    for Iimage in range(int(DebutFenetre*fps),int((DebutFenetre+TailleFenetre)*fps)):
+        Image=cv2.cvtColor(GetImage(Iimage)[0:200,5:-5], cv2.COLOR_BGR2GRAY)
+        #Image=GetImage(Iimage)[0:200,5:-5]
+        #plt.imshow(cv2.cvtColor(Image,cv2.COLOR_BGR2RGB))
+        #plt.show()
+        if ImagePrec is None:
+#            print(Image.shape)
+            Mouvements=np.zeros(Image.shape,dtype=int)
+        else:
+            Mouvements+=np.bitwise_xor(Image,ImagePrec)
+        ImagePrec=Image
+    Mvt=Mouvements
+    Fond=np.hstack((Mvt[0:100,0:75],Mvt[0:100,235:310]))
+    FondFlat=Fond.flatten()
+    FondFlat.sort()
+    SeuilBruit=FondFlat[14970]
+    SeuilBruit=min(np.mean(Fond)+np.std(Fond)*2,np.max(Fond))
+    Mv=np.copy(Mvt)
+    Mv=Mv-SeuilBruit
+    Mv[Mv<0]=0
+    Mv[0:100,0:75]=0
+    Mv[0:100,235:310]=0
+    return Mv.sum() # On pourrait diviser par le nombre d'image, le nombre de pixels or fondet par 3 
+                    # pour avoir une moyenne cohérente avec l'écart 0-255
+"""
+    Mvt=np.sum(Mouvements,axis=2)
+    
+    np.max(Mv)/11/3
+    plt.imshow(Mvt,cmap='gray')
+    plt.imshow(Mv,cmap='gray')
+    c=Mvt-Mv
+    plt.imshow(c,cmap='gray')
+    type (Mvt[0,0])
+"""
+def GetImage(NumImage,cadree=False):
+    if Images[NumImage] is None:
+        Name=f"Images/06-11-22-{NumImage}.png"        
+        Images[NumImage]=cv2.imread(Name)
+        if Images[NumImage] is None:
+            print(f"Image :{NumImage} absente" )
+            while Images[NumImage] is None:
+                NumImage-=1
+    if cadree:        
+        return Images[NumImage][15:200,40:-40]    
+    return Images[NumImage]
+"""
 def GetImage(NumImage,cadree=False):
     if cadree:
         Name=f"Images/cadree-{NumImage}.png"        
     else:
         Name=f"Images/06-11-22-{NumImage}.png"
     return cv2.imread(Name)
-"""
+DebutFenetre=16*60+36
+TailleFenetre=1
 CurrentSequence=Sequences[100]
 EcartFenetres=0.25
 TailleFenetre=1
@@ -87,4 +142,5 @@ center=False
 hz=22050
 iFenetre=0
 cadree=True
+NumImage=45544
 """

@@ -20,9 +20,10 @@ n_mfcc=13
 try:
     print("On conserve le signal à",hz,"hz")
 except:
-    Signal,hz= librosa.load('06-11-22_16cn.wav')
+    Signal,hz= librosa.load('06-11-22_16.wav')
+    Signal=(Signal-np.mean(Signal))
+    Signal=Signal/np.max(np.abs(Signal))
 
-Signal,hz= librosa.load('06-11-22_2_16cn.wav')
 
 def Features_Audio(Fenetres,TailleFenetre,EcartSousFenetres,NbSignals=10,center=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes

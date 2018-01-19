@@ -11,6 +11,7 @@ import math
 fps=25
 
 Images=[None]*58773
+ImagesHSV=[None]*58773
  
 
 
@@ -73,11 +74,31 @@ def Features_Video(Fenetres,TailleFenetre,cadree=True):
         R.append(v)
         D=Dynamisme(DebutFenetre,TailleFenetre)
         R.append(D)
+        H=Histogrammes(DebutFenetre,TailleFenetre)
+        R.extend(H)
         Retour_X.append(R)   
         if len(Retour_X)!=Fenetres.index(DebutFenetre)+1:
             print(len(Retour_X),Fenetres.index(DebutFenetre))
     return np.asarray(Retour_X)
 
+def Histogrammes(DebutFenetre,TailleFenetre):
+    ImagesBGR=[]
+    localImagesHSV=[]
+    PremiereImage=int(DebutFenetre*fps)
+    Features=[]
+    NbImages=int(TailleFenetre*fps)
+    for Iimage in range(PremiereImage,PremiereImage+NbImages):
+        Image=GetImage(Iimage,True)
+        ImagesBGR.append(Image)
+        if ImagesHSV[Iimage] is None:
+            ImagesHSV[Iimage]=cv2.cvtColor(Image, cv2.COLOR_BGR2HSV)
+        localImagesHSV.append(ImagesHSV[Iimage])
+    for dim in range(3):
+        F=cv2.calcHist(ImagesBGR,[dim],None,[16],(0,256))
+        Features.extend(F)
+        F=cv2.calcHist(localImagesHSV,[dim],None,[16],(0,256))
+        Features.extend(F)        
+    return Features
 def Dynamisme(DebutFenetre,TailleFenetre):
     ImagePrec=None
     Mouvements=None
@@ -135,6 +156,9 @@ def GetImage(NumImage,cadree=False):
     return cv2.imread(Name)
 DebutFenetre=16*60+36
 TailleFenetre=1
+
+NumImage=Iimage
+
 CurrentSequence=Sequences[100]
 EcartFenetres=0.25
 TailleFenetre=1

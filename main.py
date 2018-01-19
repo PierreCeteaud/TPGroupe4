@@ -14,6 +14,8 @@ import Fenetrage
 import numpy as np
 import importlib
 
+OnlyClassifieur2=True
+
 ## Lecture du fichier des séquences
 dateReference=datetime(1900,1,1)
 Sequences=[] # Seulement les séquences assez longues
@@ -76,36 +78,51 @@ if Normalisation:
 # Concaténation des classes audio et vidéo
 Both_Y=Audio_Y*2+Video_Y
 Both_TY=Audio_TY*2+Video_TY
-
 # Classification globale
-G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
-print("Un classifieur")
-print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
-print("Taux d'erreur sur le test:",1-(G[1][0]+G[1][5]+G[1][10]+G[1][15])/sum(G[1]))
+if not OnlyClassifieur2:
+    G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
+    print("Un classifieur")
+    print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
+    print("Taux d'erreur sur le test:",1-(G[1][0]+G[1][5]+G[1][10]+G[1][15])/sum(G[1]))
 
-# C'est moins bien :-) => on garde les entrées videos pour améliorer l
-Y11=(Audio_Y==1)&(Video_Y==1)
-Y10=(Audio_Y==1)&(Video_Y==0)
-Y01=(Audio_Y==0)&(Video_Y==1)
-Y00=(Audio_Y==0)&(Video_Y==0)
-TY11=(Audio_TY==1)&(Video_TY==1)
-TY10=(Audio_TY==1)&(Video_TY==0)
-TY01=(Audio_TY==0)&(Video_TY==1)
-TY00=(Audio_TY==0)&(Video_TY==0)
-
-Liste_Resultats=[]
-for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Test_Features),("Video",Video_Features,Video_Test_Features)):
+    # C'est moins bien :-) => on garde les entrées videos pour améliorer l
+    Y11=(Audio_Y==1)&(Video_Y==1)
+    Y10=(Audio_Y==1)&(Video_Y==0)
+    Y01=(Audio_Y==0)&(Video_Y==1)
+    Y00=(Audio_Y==0)&(Video_Y==0)
+    TY11=(Audio_TY==1)&(Video_TY==1)
+    TY10=(Audio_TY==1)&(Video_TY==0)
+    TY01=(Audio_TY==0)&(Video_TY==1)
+    TY00=(Audio_TY==0)&(Video_TY==0)
+    
+    Liste_Resultats=[]
+    for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Test_Features),("Video",Video_Features,Video_Test_Features)):
+        for Y in (("Audio",Audio_Y,Audio_TY),
+                  ("Video",Video_Y,Video_TY),
+                  ("Totalement absente",Y00,TY00),
+                  ("Présente video",Y01,TY01),
+                  ("Présente audio",Y10,TY01),
+                  ("Présente Audio+Video",Y11,TY11)):           
+            #print(Y[0],"grâce à",F[0])
+            Result=Classifier.LDA(F[1],Y[1],F[2],Y[2])
+            Liste_Resultats.append(Result)
+            #Classifier.Print(Result)
+else:
+    Liste_Resultats=[]
+    F =("Audio+Video",Features,TestFeatures)
     for Y in (("Audio",Audio_Y,Audio_TY),
-              ("Video",Video_Y,Video_TY),
-              ("Totalement absente",Y00,TY00),
-              ("Présente video",Y01,TY01),
-              ("Présente audio",Y10,TY01),
-              ("Présente Audio+Video",Y11,TY11)):           
-        print(Y[0],"grâce à",F[0])
+              ("Video",Video_Y,Video_TY)):
         Result=Classifier.LDA(F[1],Y[1],F[2],Y[2])
         Liste_Resultats.append(Result)
-        Classifier.Print(Result)
-
+        #Classifier.Print(Result)
+"""
+np.argwhere(np.isnan(Features))
+np.argwhere(np.isnan(Video_Features))
+np.argwhere(np.isnan(Audio_Features))
+Classifier.Mad_[84]
+Classifier.Mediane_[84]
+Classifier.NormaliseTrain(Features)[:,84:88]
+"""
 # Nombre d'erreurs avec deux classifeurs
 print("Deux classifieurs")        
 print("Taux d'erreur sur le train:",1-((Audio_Y==Liste_Resultats[0][2][0])
@@ -114,104 +131,128 @@ print("Taux d'erreur sur le train:",1-((Audio_Y==Liste_Resultats[0][2][0])
 print("Taux d'erreur sur le test:",1-((Audio_TY==Liste_Resultats[0][2][1])
                                     &(Video_TY==Liste_Resultats[1][2][1])).sum()/len(Audio_TY))
 
-# Nombre d'erreurs avec quatre classifeurs
-print("Quatre classifieurs")
-TrainPredit00=Liste_Resultats[2][2][0].astype(int)
-Test_Predit00=Liste_Resultats[2][2][1].astype(int)
-TrainPredit0V=Liste_Resultats[3][2][0].astype(int)
-Test_Predit0V=Liste_Resultats[3][2][1].astype(int)
-TrainPreditA0=Liste_Resultats[4][2][0].astype(int)
-Test_PreditA0=Liste_Resultats[4][2][1].astype(int)
-TrainPreditAV=Liste_Resultats[5][2][0].astype(int)
-Test_PreditAV=Liste_Resultats[5][2][1].astype(int)
+Labels=[]
+suf=""
+for d in range(3):
+    for i in range(Audio.n_mfcc):
+        Labels.append("mfcc"+suf+str(i))
+    suf=suf+"'"
+Labels.append("ZCR")
+Labels.append("Spectral contrats")
+for i in ("gris","bleu","vert","rouge","saturation","luminosité","teinte"):
+    for j in ("moyenne", "variance"):
+        Labels.append(j+" "+i)
+Labels.append("Dynamisme")
+for i in ("bleu","teinte","vert","saturation","rouge","luminosité"):
+    for j in range (16):
+        Labels.append("Histogramme "+i+" "+str(j))
+        
+ImportanceAudio=list(zip(Labels,abs(Liste_Resultats[0][3].coef_).reshape(len(Labels))))
+ImportanceVideo=list(zip(Labels,abs(Liste_Resultats[1][3].coef_)))
 
-TrainPredit=(TrainPredit00+TrainPredit0V+TrainPreditA0+TrainPreditAV)==1
-TrainOk=(TrainPredit&((TrainPredit00&Y00)|(TrainPredit0V&Y01)|(TrainPreditA0&Y10)|(TrainPreditAV&Y11))).sum()
-Test_Predit=(Test_Predit00+Test_Predit0V+Test_PreditA0+Test_PreditAV)==1
-Test_Ok=(Test_Predit&((Test_Predit00&TY00)|(Test_Predit0V&TY01)|(Test_PreditA0&TY10)|(Test_PreditAV&TY11))).sum()
-
-print("Train : % avec une prédiction",TrainPredit.sum()/len(TrainPredit))
-print("Train : % erreur sur prédiction",1-TrainOk/TrainPredit.sum())
-print("Train : % erreur sur l'ensemble",1-TrainOk/len(TrainPredit))
-print("Test  : % avec une prédiction",Test_Predit.sum()/len(Test_Predit))
-print("Test  : % erreur sur prédiction",1-Test_Ok/Test_Predit.sum())
-print("Test  : % erreur sur l'ensemble",1-Test_Ok/len(Test_Predit))
-
-print("Fenetres :")
-
-print("Un classifieur")
-Pred_Train=G[2][0]
-Pred_Test=G[2][1]
-
-Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTrain,Classe,Pred_Train)
-print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
-
-Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTest,Classe,Pred_Test)
-print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
-
-print("Deux classifieurs")
-Pred_Train=Liste_Resultats[0][2][0]*2+Liste_Resultats[1][2][0]
-Pred_Test=Liste_Resultats[0][2][1]*2+Liste_Resultats[1][2][1]
-
-Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTrain,Classe,Pred_Train)
-print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
-
-#importlib.reload(Classifier)
-Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTest,Classe,Pred_Test)
-print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
-
-print("Quatre classifieurs")
-
-Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-Predictions=list(zip(TrainPredit00,TrainPredit0V,TrainPreditA0,TrainPreditAV))
-
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqTrain,Classe,Predictions)
-
-print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
-Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
-Predictions=list(zip(Test_Predit00,Test_Predit0V,Test_PreditA0,Test_PreditAV))
-
-PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqTest,Classe,Predictions)
-
-print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
-
-"""
-
-
-len(Train)
-len(Video_Features[1])
-print(len(Audio_Features),len(Audio_Y))
-print(len(Video_Features),len(Video_Y))
-import importlib
-importlib.reload(Audio)
-importlib.reload(Video)
-importlib.reload(Classifier)
-len(Audio_Features[0])
-# Test 4
-List_Erreurs=[1,2,7,12,24,25,36,39,49,50,56,61,64,69,72,73,77,80,92,93]
-# Test 1
-List_Erreurs=[1,3,11,22,28,32,33,36,40,41,44,45,48,49,57,58,62,72,75,83,88,91,101,103,110]
-List_Erreurs=[1,3]
-for E in List_Erreurs:
-    D=NumSeqAudioTest.index(E)
-    F=NumSeqAudioTest.index(E+1)
-    test=slice(D,F)
-    print(Test[E][0].total_seconds(),Test[E][1].total_seconds())
-    print(Pred_Test[test])
-    print(PredictionsFenetres[E])
-    print(Classe[test])
-
-Classe[0:20] 
-NumSeqAudioTest[0:20]
-NumSeqAudioTest[test]
-Audio_TY[test]
-Video_TY[test]
-Test_Predit00[test]
-Test_Predit0V[test]
-Test_PreditA0[test]
-Test_PreditAV[test]
-"""
+len(Labels)
+Audio_Features.shape
+Video_Features.shape
+Liste_Resultats[0][3].coef_.shape
+if not OnlyClassifieur2:
+    # Nombre d'erreurs avec quatre classifeurs
+    print("Quatre classifieurs")
+    TrainPredit00=Liste_Resultats[2][2][0].astype(int)
+    Test_Predit00=Liste_Resultats[2][2][1].astype(int)
+    TrainPredit0V=Liste_Resultats[3][2][0].astype(int)
+    Test_Predit0V=Liste_Resultats[3][2][1].astype(int)
+    TrainPreditA0=Liste_Resultats[4][2][0].astype(int)
+    Test_PreditA0=Liste_Resultats[4][2][1].astype(int)
+    TrainPreditAV=Liste_Resultats[5][2][0].astype(int)
+    Test_PreditAV=Liste_Resultats[5][2][1].astype(int)
+    
+    TrainPredit=(TrainPredit00+TrainPredit0V+TrainPreditA0+TrainPreditAV)==1
+    TrainOk=(TrainPredit&((TrainPredit00&Y00)|(TrainPredit0V&Y01)|(TrainPreditA0&Y10)|(TrainPreditAV&Y11))).sum()
+    Test_Predit=(Test_Predit00+Test_Predit0V+Test_PreditA0+Test_PreditAV)==1
+    Test_Ok=(Test_Predit&((Test_Predit00&TY00)|(Test_Predit0V&TY01)|(Test_PreditA0&TY10)|(Test_PreditAV&TY11))).sum()
+    
+    print("Train : % avec une prédiction",TrainPredit.sum()/len(TrainPredit))
+    print("Train : % erreur sur prédiction",1-TrainOk/TrainPredit.sum())
+    print("Train : % erreur sur l'ensemble",1-TrainOk/len(TrainPredit))
+    print("Test  : % avec une prédiction",Test_Predit.sum()/len(Test_Predit))
+    print("Test  : % erreur sur prédiction",1-Test_Ok/Test_Predit.sum())
+    print("Test  : % erreur sur l'ensemble",1-Test_Ok/len(Test_Predit))
+    
+    print("Fenetres :")
+    
+    print("Un classifieur")
+    Pred_Train=G[2][0]
+    Pred_Test=G[2][1]
+    
+    Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
+    PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTrain,Classe,Pred_Train)
+    print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
+    
+    Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
+    PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTest,Classe,Pred_Test)
+    print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
+    
+    print("Deux classifieurs")
+    Pred_Train=Liste_Resultats[0][2][0]*2+Liste_Resultats[1][2][0]
+    Pred_Test=Liste_Resultats[0][2][1]*2+Liste_Resultats[1][2][1]
+    
+    Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
+    PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTrain,Classe,Pred_Train)
+    print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
+    
+    #importlib.reload(Classifier)
+    Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
+    PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetres(NumSeqTest,Classe,Pred_Test)
+    print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
+    
+    print("Quatre classifieurs")
+    
+    Classe=Audio_Y*2+Video_Y # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
+    Predictions=list(zip(TrainPredit00,TrainPredit0V,TrainPreditA0,TrainPreditAV))
+    
+    PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqTrain,Classe,Predictions)
+    
+    print("Taux d'erreur sur le train :",Ko/(Ok+Ko))
+    Classe=Audio_TY*2+Video_TY # 0= absente A et V, 1 présente vidéo, 2 présente Audio, 3 présente audio et vidéo
+    Predictions=list(zip(Test_Predit00,Test_Predit0V,Test_PreditA0,Test_PreditAV))
+    
+    PredictionsFenetres,Ok,Ko=Classifier.PredictionFenetre4Classifieurs(NumSeqTest,Classe,Predictions)
+    
+    print("Taux d'erreur sur le test :",Ko/(Ok+Ko))
+    
+    """
+    
+    
+    len(Train)
+    len(Video_Features[1])
+    print(len(Audio_Features),len(Audio_Y))
+    print(len(Video_Features),len(Video_Y))
+    import importlib
+    importlib.reload(Audio)
+    importlib.reload(Video)
+    importlib.reload(Classifier)
+    len(Audio_Features[0])
+    # Test 4
+    List_Erreurs=[1,2,7,12,24,25,36,39,49,50,56,61,64,69,72,73,77,80,92,93]
+    # Test 1
+    List_Erreurs=[1,3,11,22,28,32,33,36,40,41,44,45,48,49,57,58,62,72,75,83,88,91,101,103,110]
+    List_Erreurs=[1,3]
+    for E in List_Erreurs:
+        D=NumSeqAudioTest.index(E)
+        F=NumSeqAudioTest.index(E+1)
+        test=slice(D,F)
+        print(Test[E][0].total_seconds(),Test[E][1].total_seconds())
+        print(Pred_Test[test])
+        print(PredictionsFenetres[E])
+        print(Classe[test])
+    
+    Classe[0:20] 
+    NumSeqAudioTest[0:20]
+    NumSeqAudioTest[test]
+    Audio_TY[test]
+    Video_TY[test]
+    Test_Predit00[test]
+    Test_Predit0V[test]
+    Test_PreditA0[test]
+    Test_PreditAV[test]
+    """

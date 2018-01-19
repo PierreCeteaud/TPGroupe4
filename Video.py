@@ -10,10 +10,13 @@ import numpy as np
 import math
 fps=25
 
-Images=[None]*58773
-ImagesHSV=[None]*58773
- 
-
+try:
+    print("On conserve le cache des images :",len(Images))
+except:
+    Images=[None]*58773
+    ImagesHSV=[None]*58773
+     
+#XY=[]
 
 def Features_Video(Fenetres,TailleFenetre,cadree=True):
     # EcartFenetres et TailleFenetre sont donnés en secondes
@@ -22,7 +25,8 @@ def Features_Video(Fenetres,TailleFenetre,cadree=True):
     # une colonne par feature, la dernière colonne indique si la fenêtre est avec ou sans la présentatrice    
     # le nombre de fenêtres suit la règle définie par librosa.sftf
     Retour_X=[]
-    for DebutFenetre in Fenetres:
+    for i,DebutFenetre in enumerate(Fenetres):
+        
         ImageMilieu=int(fps*(DebutFenetre+TailleFenetre/2))
         img=GetImage(ImageMilieu,cadree)
         # Les deux première features sont
@@ -44,7 +48,7 @@ def Features_Video(Fenetres,TailleFenetre,cadree=True):
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         # pour la saturation et la luminosité c'est exactement pareil
         for val in range(1,3):
-            image=img[:,:,color]                    
+            image=img[:,:,val]                    
             m = np.mean(image)
             v= np.var(image)
             R.append(m)
@@ -69,11 +73,12 @@ def Features_Video(Fenetres,TailleFenetre,cadree=True):
             m=math.atan(ymoyen/xmoyen)
         else: 
             m=math.pi+math.atan(ymoyen/xmoyen)
-        R.append(m)
+#        XY.append((xmoyen,ymoyen,m))
+        R.append(m)        
         v=1-(np.var(x)+np.var(y))**0.5
         R.append(v)
         D=Dynamisme(DebutFenetre,TailleFenetre)
-        R.append(D)
+        R.append(D)        
         H=Histogrammes(DebutFenetre,TailleFenetre)
         R.extend(H)
         Retour_X.append(R)   
@@ -94,9 +99,9 @@ def Histogrammes(DebutFenetre,TailleFenetre):
             ImagesHSV[Iimage]=cv2.cvtColor(Image, cv2.COLOR_BGR2HSV)
         localImagesHSV.append(ImagesHSV[Iimage])
     for dim in range(3):
-        F=cv2.calcHist(ImagesBGR,[dim],None,[16],(0,256))
+        F=np.nan_to_num(cv2.calcHist(ImagesBGR,[dim],None,[16],(0,256)))
         Features.extend(F)
-        F=cv2.calcHist(localImagesHSV,[dim],None,[16],(0,256))
+        F=np.nan_to_num(cv2.calcHist(localImagesHSV,[dim],None,[16],(0,256)))
         Features.extend(F)        
     return Features
 def Dynamisme(DebutFenetre,TailleFenetre):

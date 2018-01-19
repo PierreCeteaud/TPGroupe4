@@ -22,8 +22,16 @@ def LDA(Train,Y_Train,Test,Y_Test,Values=(True,False)):
                 R.append(((jeu[0]==Pred)&(jeu[1]==Y)).sum())
         Retour.append(R)
     Retour.append([PredTrain,PredTest])
+    Retour.append(LDA)
     return Retour
-
+"""
+Train=F[1]
+Y_Train=Y[1]
+LDA.fit(Train, Y_Train)    
+print(Train.shape, Y_Train.shape)
+Train.min(axis=0)
+Y_Train.mean()
+"""
 # Ne fonctionne qu'avec un LDA à deux valeurs cibles
 def Print(Result):
     for R in(("Train -",Result[0]),("Test -",Result[1])):
@@ -188,6 +196,8 @@ def NormaliseTrain(Features):
     global Mad_
     Mediane_=np.median(Features,axis=0)
     Mad_=robust.mad(Features,axis=0)
+    Mad_[np.isnan(Mad_)]=1
+    Mad_[Mad_==0]=1
     return NormaliseAutres(Features)
 def NormaliseAutres(Features):
     return (Features-Mediane_)/Mad_

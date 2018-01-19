@@ -20,7 +20,7 @@ n_mfcc=13
 try:
     print("On conserve le signal à",hz,"hz")
 except:
-    Signal,hz= librosa.load('06-11-22_16.wav')
+    Signal,hz= librosa.load('06-11-22_16.wav',16000)
     Signal=(Signal-np.mean(Signal))
     Signal=Signal/np.max(np.abs(Signal))
 

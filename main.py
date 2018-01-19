@@ -148,12 +148,17 @@ for i in ("bleu","teinte","vert","saturation","rouge","luminosité"):
         Labels.append("Histogramme "+i+" "+str(j))
         
 ImportanceAudio=list(zip(Labels,abs(Liste_Resultats[0][3].coef_).reshape(len(Labels))))
-ImportanceVideo=list(zip(Labels,abs(Liste_Resultats[1][3].coef_)))
+ImportanceVideo=list(zip(Labels,abs(Liste_Resultats[1][3].coef_).reshape(len(Labels))))
 
 len(Labels)
 Audio_Features.shape
 Video_Features.shape
 Liste_Resultats[0][3].coef_.shape
+np.median(Features,axis=0)
+from statsmodels import robust
+robust.mad(Features,axis=0)
+
+
 if not OnlyClassifieur2:
     # Nombre d'erreurs avec quatre classifeurs
     print("Quatre classifieurs")

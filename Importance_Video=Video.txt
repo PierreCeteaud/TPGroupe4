@@ -1,0 +1,111 @@
+Feature	Importance
+moyenne gris	0.7775688596194735
+variance gris	0.0006414476009556385
+moyenne bleu	0.06989993890162453
+variance bleu	0.00020530676700088158
+moyenne vert	0.23023681168204843
+variance vert	0.00026566829162932067
+moyenne rouge	0.12485847560784549
+variance rouge	7.371614754329413e-05
+moyenne saturation	0.23023681127430512
+variance saturation	0.0002656682190795151
+moyenne luminosité	0.12485847669389147
+variance luminosité	7.371554764930288e-05
+moyenne teinte	1.2311163870367317
+variance teinte	0.14444019846353337
+Histogramme bleu 0	1.756219780713053e-09
+Histogramme bleu 1	1.3505152138874876e-05
+Histogramme bleu 2	9.351144555944796e-06
+Histogramme bleu 3	1.240537792761287e-06
+Histogramme bleu 4	4.336090764726214e-06
+Histogramme bleu 5	3.3653976213021686e-06
+Histogramme bleu 6	4.736042529745327e-06
+Histogramme bleu 7	9.06248596429203e-06
+Histogramme bleu 8	5.693976417930208e-06
+Histogramme bleu 9	4.155867329339036e-06
+Histogramme bleu 10	6.739718675957684e-06
+Histogramme bleu 11	5.148597201548588e-06
+Histogramme bleu 12	5.68446151966856e-06
+Histogramme bleu 13	2.9515877143868746e-05
+Histogramme bleu 14	0.00018177365042173002
+Histogramme bleu 15	9.374784339690606e-05
+Histogramme teinte 0	9.864417443751321e-05
+Histogramme teinte 1	1.0996688497955792e-05
+Histogramme teinte 2	1.4281780305089309e-05
+Histogramme teinte 3	3.5413637758212324e-06
+Histogramme teinte 4	4.964226679876529e-05
+Histogramme teinte 5	7.008673549499089e-05
+Histogramme teinte 6	9.845078259435036e-07
+Histogramme teinte 7	7.358669244922345e-07
+Histogramme teinte 8	7.2554917939643415e-06
+Histogramme teinte 9	9.314289743708043e-06
+Histogramme teinte 10	2.1739860109830367e-05
+Histogramme teinte 11	6.719624501912939e-06
+Histogramme teinte 12	2.598325044144735e-06
+Histogramme teinte 13	7.650130529057719e-14
+Histogramme teinte 14	2.5416474480621787e-13
+Histogramme teinte 15	1.314226505400029e-14
+Histogramme vert 0	3.6195352270951275e-13
+Histogramme vert 1	1.4394203214401075e-05
+Histogramme vert 2	1.2401938047162941e-05
+Histogramme vert 3	2.8092608947340864e-07
+Histogramme vert 4	2.1881960316031193e-05
+Histogramme vert 5	3.173651430573568e-05
+Histogramme vert 6	1.986889153045377e-05
+Histogramme vert 7	2.1561164993539467e-05
+Histogramme vert 8	1.3010976949889841e-05
+Histogramme vert 9	4.517725681607576e-06
+Histogramme vert 10	6.8768803575848525e-06
+Histogramme vert 11	5.798300653614419e-06
+Histogramme vert 12	2.4370004062291423e-05
+Histogramme vert 13	2.331103183447758e-05
+Histogramme vert 14	9.96507187084935e-06
+Histogramme vert 15	1.7837215482536042e-05
+Histogramme saturation 0	1.0958639151592911e-05
+Histogramme saturation 1	9.266702985025188e-06
+Histogramme saturation 2	1.1518642152097414e-05
+Histogramme saturation 3	1.835472144277872e-05
+Histogramme saturation 4	1.264037238360785e-05
+Histogramme saturation 5	1.3636740324281076e-05
+Histogramme saturation 6	3.7789299507096086e-06
+Histogramme saturation 7	6.141469064746552e-06
+Histogramme saturation 8	1.958027769782822e-07
+Histogramme saturation 9	2.1214254948749046e-05
+Histogramme saturation 10	2.4899780995036756e-06
+Histogramme saturation 11	6.645765673013795e-05
+Histogramme saturation 12	4.327673190435491e-05
+Histogramme saturation 13	1.5837315124172732e-05
+Histogramme saturation 14	9.864762287320169e-05
+Histogramme saturation 15	9.667189548842711e-05
+Histogramme rouge 0	1.0492178180703665e-05
+Histogramme rouge 1	6.011731666966634e-05
+Histogramme rouge 2	5.856537381491826e-05
+Histogramme rouge 3	2.841212637695622e-05
+Histogramme rouge 4	1.7944450695256062e-05
+Histogramme rouge 5	1.53957391968787e-06
+Histogramme rouge 6	3.367536703352894e-05
+Histogramme rouge 7	1.1566149526421807e-05
+Histogramme rouge 8	1.303002505149975e-06
+Histogramme rouge 9	8.635032004475351e-06
+Histogramme rouge 10	1.227900092748424e-05
+Histogramme rouge 11	1.5145588329983084e-06
+Histogramme rouge 12	2.5855589634336124e-05
+Histogramme rouge 13	1.5069068289207121e-05
+Histogramme rouge 14	5.143116532626765e-05
+Histogramme rouge 15	6.870474502802164e-05
+Histogramme luminosité 0	2.3949495312943977e-05
+Histogramme luminosité 1	7.06575039782064e-05
+Histogramme luminosité 2	7.269927159448894e-05
+Histogramme luminosité 3	3.462212236066131e-05
+Histogramme luminosité 4	2.945649012070159e-05
+Histogramme luminosité 5	1.6163822134623428e-05
+Histogramme luminosité 6	4.8371409990471004e-05
+Histogramme luminosité 7	1.7868261118020312e-05
+Histogramme luminosité 8	3.078259778654252e-05
+Histogramme luminosité 9	1.729362530580869e-05
+Histogramme luminosité 10	2.9976684759583372e-05
+Histogramme luminosité 11	2.117853173845899e-05
+Histogramme luminosité 12	3.859686873345508e-05
+Histogramme luminosité 13	2.5589849075476068e-05
+Histogramme luminosité 14	0.00018348454743529093
+Histogramme luminosité 15	5.212153337158694e-05

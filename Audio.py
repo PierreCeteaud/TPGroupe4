@@ -12,7 +12,7 @@ import librosa.output
 import librosa.feature as feature
 
 window = 'hamming'
-fmin = 20
+fmin = 25
 # Cette limite est à étudier, en effet on trouvera facilement que la voix humaine
 # varie entre 80 et 1500 hz
 fmax = 4000
@@ -25,13 +25,15 @@ except:
     Signal=Signal/np.max(np.abs(Signal))
 
 
-def Features_Audio(Fenetres,TailleFenetre,EcartSousFenetres,NbSignals=10,center=True):
-    # EcartFenetres et TailleFenetre sont donnés en secondes
+def Features_Audio(Fenetres,TailleFenetre,EcartSousFenetres,fen_anal=100,center=True):
+    # TailleFenetre est donné en secondes et correspond à la taille des fenetres de texture
+    # Ecartsousfenetre est donné en proportion de de fen_anal (0,5 pour un recouvrement de deux fenêtres, 1/3 pour 3 fenetres, 1 pas de recouvrement)
+    # Fen_anal en ms (taille de la fenêtre d'analyse)
     # une ligne par fenêtre
     # une colonne par feature    
     # Retour_X une liste des features par fenetre
     Retour_X=[]
-    win_l=hz*TailleFenetre/NbSignals
+    win_l=hz*fen_anal
     hop_l=int(win_l*EcartSousFenetres)
     win_l=int(win_l)
     for DebutFenetre in Fenetres:

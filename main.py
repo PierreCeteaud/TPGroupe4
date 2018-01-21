@@ -61,11 +61,11 @@ Audio_Y1=Audio_Y_tmp[Audio_Y_tmp==1]
 
 
 importlib.reload(Audio)
-Audio_Features=Audio.Features_Audio(FenetresTrain,1,0.5,center=False)
+Audio_Features=Audio.Features_Audio(FenetresTrain,1,0.5,center=False,fen_anal=40)
 importlib.reload(Video)
 Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
 
-Audio_Test_Features=Audio.Features_Audio(FenetresTest,1,0.5,center=False)
+Audio_Test_Features=Audio.Features_Audio(FenetresTest,1,0.5,center=False,fen_anal=40)
 Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
 
 # Concaténation et normalisation des features audio et Video
@@ -191,7 +191,9 @@ plt.show()
 Classifier.plot_confusion_matrix(CM,True)
 plt.show()
 
-        
+from sklearn.metrics import f1_score
+print("Audio-Audio :",f1_score(Audio_TY, A_A[2][1]))
+
 ImportanceAudio=list(zip(Labels,(Liste_Resultats[0][3].feature_importances_).reshape(len(Labels))))
 ImportanceAudio=list(zip(Labels,(abs(Liste_Resultats[0][3].coef_)).reshape(len(Labels))))
 ImportanceVideo=list(zip(Labels,(abs(Liste_Resultats[1][3].scalings_*Liste_Resultats[1][3].coef_.T)).reshape(len(Labels))))

@@ -7,13 +7,14 @@ Created on Mon Jan  1 23:41:27 2018
 import numpy as np
 
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression
 
 def LDA(Train,Y_Train,Test,Y_Test,Values=(True,False)):
-    LDA=LinearDiscriminantAnalysis()
-    LDA.fit(Train, Y_Train)    
-    PredTrain=LDA.predict(Train)
-    PredTest=LDA.predict(Test)
+    Clas=LinearDiscriminantAnalysis()
+    Clas.fit(Train, Y_Train)    
+    PredTrain=Clas.predict(Train)
+    PredTest=Clas.predict(Test)
     Retour=[]
     for jeu in ((PredTrain,Y_Train),(PredTest,Y_Test)):
         R=[]
@@ -22,12 +23,50 @@ def LDA(Train,Y_Train,Test,Y_Test,Values=(True,False)):
                 R.append(((jeu[0]==Pred)&(jeu[1]==Y)).sum())
         Retour.append(R)
     Retour.append([PredTrain,PredTest])
-    Retour.append(LDA)
+    Retour.append(Clas)
     return Retour
+
+min_samples_split=0.05
+
+def RF(Train,Y_Train,Test,Y_Test,Values=(True,False)):
+    Clas=RandomForestClassifier(min_samples_split=min_samples_split)
+    Clas.fit(Train, Y_Train)    
+    PredTrain=Clas.predict(Train)
+    PredTest=Clas.predict(Test)
+    Retour=[]
+    for jeu in ((PredTrain,Y_Train),(PredTest,Y_Test)):
+        R=[]
+        for Pred in Values:
+            for Y in Values:
+                R.append(((jeu[0]==Pred)&(jeu[1]==Y)).sum())
+        Retour.append(R)
+    Retour.append([PredTrain,PredTest])
+    Retour.append(Clas)
+    return Retour
+
+seuilLR=0.5
+
+def LR(Train,Y_Train,Test,Y_Test):
+    Values=(True,False)
+    Clas=LinearRegression()
+    Clas.fit(Train, Y_Train)    
+    PredTrain=Clas.predict(Train)>seuilLR
+    PredTest=Clas.predict(Test)>seuilLR
+    Retour=[]
+    for jeu in ((PredTrain,Y_Train),(PredTest,Y_Test)):
+        R=[]
+        for Pred in Values:
+            for Y in Values:
+                R.append(((jeu[0]==Pred)&(jeu[1]==Y)).sum())
+        Retour.append(R)
+    Retour.append([PredTrain,PredTest])
+    Retour.append(Clas)
+    return Retour
+
 """
 Train=F[1]
 Y_Train=Y[1]
-LDA.fit(Train, Y_Train)    
+Clas.fit(Train, Y_Train)    
 print(Train.shape, Y_Train.shape)
 Train.min(axis=0)
 Y_Train.mean()
@@ -195,7 +234,9 @@ def NormaliseTrain(Features):
     global Mediane_
     global Mad_
     Mediane_=np.median(Features,axis=0)
+    #Mediane_=np.mean(Features,axis=0)
     Mad_=robust.mad(Features,axis=0)
+    #Mad_=np.std(Features,axis=0)
     Mad_[np.isnan(Mad_)]=1
     Mad_[Mad_==0]=1
     return NormaliseAutres(Features)

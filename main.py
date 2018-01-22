@@ -14,6 +14,7 @@ import Fenetrage
 import numpy as np
 import importlib
 import sys
+from sklearn.metrics import f1_score
 
 
 ## Lecture du fichier des séquences
@@ -55,36 +56,6 @@ Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)
 importlib.reload(Fenetrage)
 NumSeqTrain,Audio_Y,Video_Y,FenetresTrain=Fenetrage.Decoupe(Train,0.5,1)
 NumSeqTest,Audio_TY,Video_TY,FenetresTest=Fenetrage.Decoupe(Test,0.5,1)
-Audio_Y_tmp=np.asarray(Audio_Y)
-Audio_Y0=Audio_Y_tmp[Audio_Y_tmp==0]
-Audio_Y1=Audio_Y_tmp[Audio_Y_tmp==1]
-
-
-importlib.reload(Audio)
-Audio_Features=Audio.Features_Audio(FenetresTrain,1,0.5,center=False,fen_anal=40)
-importlib.reload(Video)
-Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
-
-Audio_Test_Features=Audio.Features_Audio(FenetresTest,1,0.5,center=False,fen_anal=40)
-Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
-
-# Concaténation et normalisation des features audio et Video
-Features=np.hstack((Audio_Features,Video_Features))
-TestFeatures=np.hstack((Audio_Test_Features,Video_Test_Features))
-
-Normalisation=True
-if Normalisation:
-    Features=Classifier.NormaliseTrain(Features)
-    TestFeatures=Classifier.NormaliseAutres(TestFeatures)
-
-# Concaténation des classes audio et vidéo
-Both_Y=Audio_Y*2+Video_Y
-Both_TY=Audio_TY*2+Video_TY
-# Classification globale
-G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
-print("Un classifieur")
-print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
-print("Taux d'erreur sur le test:",1-(G[1][0]+G[1][5]+G[1][10]+G[1][15])/sum(G[1]))
 
 LabelsA=[]
 suf=""
@@ -98,11 +69,65 @@ LabelsV=[]
 for i in ("gris","bleu","vert","rouge","saturation","luminosité","teinte"):
     for j in ("moyenne", "variance"):
         LabelsV.append(j+" "+i)
-Labels.append("Dynamisme")
+LabelsV.append("Dynamisme")
 for i in ("bleu","teinte","vert","saturation","rouge","luminosité"):
     for j in range (16):
         LabelsV.append("Histogramme "+i+" "+str(j))
 LabelsAV=LabelsA+LabelsV
+
+
+TailleFenetre=2
+Audio.fmin=33
+Audio.fmax=895
+Audio.n_mfcc=24
+Audio.n_MEL=25
+f_anal=31
+Recouvrement=2
+
+importlib.reload(Video)
+Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
+Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
+
+importlib.reload(Audio)
+Audio.fmin=1000/30*2
+
+
+importlib.reload(Fenetrage)
+NumSeqTrain,Audio_Y,Video_Y,FenetresTrain=Fenetrage.Decoupe(Train,0.5,TailleFenetre)
+NumSeqTest,Audio_TY,Video_TY,FenetresTest=Fenetrage.Decoupe(Test,0.5,TailleFenetre)
+
+
+Audio_Features=Audio.Features_Audio(FenetresTrain,TailleFenetre,
+                                    1/Recouvrement,center=False,
+                                    fen_anal=f_anal)
+Audio_Test_Features=Audio.Features_Audio(FenetresTest,TailleFenetre,
+                                    1/Recouvrement,center=False,
+                                    fen_anal=f_anal)
+
+# Concaténation et normalisation des features audio et Video
+Features=np.hstack((Audio_Features,Video_Features))
+TestFeatures=np.hstack((Audio_Test_Features,Video_Test_Features))
+
+Normalisation=True
+if Normalisation:
+    Features=Classifier.NormaliseTrain(Features)
+    TestFeatures=Classifier.NormaliseAutres(TestFeatures)
+    
+    Audio_Features=Classifier.NormaliseTrain(Audio_Features)
+    Audio_Test_Features=Classifier.NormaliseAutres(Audio_Test_Features)
+    
+    Video_Features=Classifier.NormaliseTrain(Video_Features)
+    Video_Test_Features=Classifier.NormaliseAutres(Video_Test_Features)
+
+# Concaténation des classes audio et vidéo
+Both_Y=Audio_Y*2+Video_Y
+Both_TY=Audio_TY*2+Video_TY
+# Classification globale
+G=Classifier.LDA(Features, Both_Y,TestFeatures,Both_TY,(0,1,2,3))
+        
+print("Un classifieur")
+print("Taux d'erreur sur le train:",1-(G[0][0]+G[0][5]+G[0][10]+G[0][15])/sum(G[0]))
+print("Taux d'erreur sur le test:",1-(G[1][0]+G[1][5]+G[1][10]+G[1][15])/sum(G[1]))
 
 Importance1=list(zip(LabelsAV,abs(G[3].coef_.T)))
 fichier = open("Importance1.txt", "w")
@@ -111,22 +136,24 @@ for ligne in Importance1:
     fichier.write(f"{ligne[0]}\t{ligne[1][0]}\t{ligne[1][1]}\t{ligne[1][2]}\t{ligne[1][3]}\n")
 
 fichier.close()
-    
+
 importlib.reload(Classifier)
 Liste_Resultats=[]
+
+
 for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Test_Features),("Video",Video_Features,Video_Test_Features)):
     for Y in (("Audio",Audio_Y,Audio_TY),
               ("Video",Video_Y,Video_TY)):           
-              #("Totalement absente",Y00,TY00),
-              #("Présente video",Y01,TY01),
-              #("Présente audio",Y10,TY01),
-              #("Présente Audio+Video",Y11,TY11)
-        #print(Y[0],"grâce à",F[0])
+      #("Totalement absente",Y00,TY00),
+      #("Présente video",Y01,TY01),
+      #("Présente audio",Y10,TY01),
+      #("Présente Audio+Video",Y11,TY11)
+#print(Y[0],"grâce à",F[0])
         Result=Classifier.LR(F[1],Y[1],F[2],Y[2])
         Liste_Resultats.append(Result)
-        if F=="Audio+Video":
+        if F[0]=="Audio+Video":
             Importance=list(zip(LabelsAV,abs(Result[3].coef_.T)))
-        elif F=="Audio":
+        elif F[0]=="Audio":
             Importance=list(zip(LabelsA,abs(Result[3].coef_.T)))
         else:
             Importance=list(zip(LabelsV,abs(Result[3].coef_.T)))
@@ -136,10 +163,11 @@ for F in (("Audio+Video",Features,TestFeatures),("Audio",Audio_Features,Audio_Te
             fichier.write(f"{ligne[0]}\t{ligne[1]}\n")
         fichier.close()
 
-            #Classifier.Print(Result)
+    #Classifier.Print(Result)
 
 
-
+Liste_Resultats[0][3].coef_.shape
+len(LabelsAV)
 
 # Nombre d'erreurs avec deux classifeurs
 print("Deux classifieurs")        
@@ -190,8 +218,9 @@ Classifier.plot_confusion_matrix(CM)
 plt.show()
 Classifier.plot_confusion_matrix(CM,True)
 plt.show()
-
-from sklearn.metrics import f1_score
+"""
+A_A=Liste_Resultats[0]
+print(f)
 print("Audio-Audio :",f1_score(Audio_TY, A_A[2][1]))
 
 ImportanceAudio=list(zip(Labels,(Liste_Resultats[0][3].feature_importances_).reshape(len(Labels))))

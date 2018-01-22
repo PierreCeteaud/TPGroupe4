@@ -53,7 +53,6 @@ from sklearn.model_selection import train_test_split
 ratio=0.7
 Train, Test = train_test_split(Sequences, train_size=ratio, random_state = 42)  
 
-importlib.reload(Fenetrage)
 NumSeqTrain,Audio_Y,Video_Y,FenetresTrain=Fenetrage.Decoupe(Train,0.5,1)
 NumSeqTest,Audio_TY,Video_TY,FenetresTest=Fenetrage.Decoupe(Test,0.5,1)
 
@@ -84,11 +83,9 @@ Audio.n_MEL=25
 f_anal=31
 Recouvrement=2
 
-importlib.reload(Video)
 Video_Features=Video.Features_Video(FenetresTrain,1,cadree=True)
 Video_Test_Features=Video.Features_Video(FenetresTest,1,cadree=True)
 
-importlib.reload(Audio)
 Audio.fmin=1000/30*2
 
 
@@ -137,7 +134,6 @@ for ligne in Importance1:
 
 fichier.close()
 
-importlib.reload(Classifier)
 Liste_Resultats=[]
 
 

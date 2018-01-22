@@ -16,7 +16,7 @@ def Decoupe(Sequences,EcartFenetres,TailleFenetres):
         Sequence=Sequences[iSequence]
         LargeurSequence=Sequence[6]
         NbFenetres=1+math.ceil((LargeurSequence-TailleFenetres)/EcartFenetres)
-        if NbFenetres==0:
+        if NbFenetres<=1:
             Ecart=1
         else:
             Ecart=(LargeurSequence-TailleFenetres)/(NbFenetres-1)            
@@ -33,7 +33,7 @@ def Decoupe(Sequences,EcartFenetres,TailleFenetres):
 np.arange(0,7,0.5)
 
 EcartFenetres=0.5
-TailleFenetres=1
+TailleFenetres=f
 Sequences=Train
 iSequence=31
 NbFenetres

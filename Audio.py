@@ -17,6 +17,7 @@ fmin = 25
 # varie entre 80 et 1500 hz
 fmax = 4000
 n_mfcc=13
+n_MEL=24
 try:
     print("On conserve le signal à",hz,"hz")
 except:
@@ -33,7 +34,7 @@ def Features_Audio(Fenetres,TailleFenetre,EcartSousFenetres,fen_anal=100,center=
     # une colonne par feature    
     # Retour_X une liste des features par fenetre
     Retour_X=[]
-    win_l=hz*fen_anal
+    win_l=hz*fen_anal/1000
     hop_l=int(win_l*EcartSousFenetres)
     win_l=int(win_l)
     for DebutFenetre in Fenetres:
@@ -45,7 +46,7 @@ def Features_Audio(Fenetres,TailleFenetre,EcartSousFenetres,fen_anal=100,center=
                                 hop_length=hop_l,
                                 center=center))**2
         # calcul du MEL
-        S = feature.melspectrogram(S=D, y=Fenetre, n_mels=24, fmin=fmin, fmax=fmax)
+        S = feature.melspectrogram(S=D, y=Fenetre, n_mels=n_MEL, fmin=fmin, fmax=fmax)
         # calcul des 13 coefficients
         mfcc = feature.mfcc(S=librosa.power_to_db(S), n_mfcc=n_mfcc)
         # Calcul de la dérivée
